@@ -1,0 +1,7 @@
+Retry Failed Tasks=Retry Failed Tasks
+Clear Failed Tasks=Clear Failed Tasks
+Clear Completed Tasks=Clear Completed Tasks
+Clear All Tasks=Clear All Tasks
+Retry Failed Tasks Automatically=Retry Failed Tasks Automatically
+Auto Retry Interval=Auto Retry Interval
+Show Auto Retry Countdown=Show Auto Retry Countdown

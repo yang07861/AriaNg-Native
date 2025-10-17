@@ -107,25 +107,34 @@
                             <i class="fa fa-pause"></i>
                         </a>
                     </li>
-                    <li class="disabled" ng-class="{'disabled': !isTaskSelected() && !isSpecifiedTaskShowing('complete', 'error', 'removed')}">
-                        <a class="toolbar dropdown-toggle" data-toggle="dropdown" title="{{'Delete' | translate}}">
-                            <i class="fa fa-trash-o"></i>
-                            <i class="fa fa-caret-right fa-right-bottom fa-rotate-45 fa-half" aria-hidden="true"></i>
+                    <li class="disabled" ng-class="{'disabled': !isSpecifiedTaskShowing('error')}">
+                        <a class="toolbar" title="{{'Retry Failed Tasks' | translate}}" ng-click="retryAllFailedTasks()">
+                            <i class="fa fa-refresh"></i>
                         </a>
-                        <ul class="dropdown-menu" role="menu">
-                            <li ng-if="isTaskSelected()">
-                                <a class="pointer-cursor" ng-click="removeTasks()">
-                                    <span translate>Remove Task</span>
-                                </a>
-                            </li>
-                            <li ng-if="taskContext.enableSelectAll && isSpecifiedTaskShowing('complete', 'error', 'removed')">
-                                <a class="pointer-cursor" ng-click="clearStoppedTasks()">
-                                    <span translate>Clear Stopped Tasks</span>
-                                </a>
-                            </li>
-                        </ul>
+                    </li>
+                    <li class="disabled" ng-class="{'disabled': !isSpecifiedTaskShowing('error', 'paused')}">
+                        <a class="toolbar" title="{{'Clear Failed Tasks' | translate}}" ng-click="clearFailedTasks()">
+                            <i class="fa fa-times-circle-o"></i>
+                        </a>
+                    </li>
+                    <li class="disabled" ng-class="{'disabled': !isSpecifiedTaskShowing('complete')}">
+                        <a class="toolbar" title="{{'Clear Completed Tasks' | translate}}" ng-click="clearCompletedTasks()">
+                            <i class="fa fa-check-circle-o"></i>
+                        </a>
+                    </li>
+                    <li class="disabled" ng-class="{'disabled': !isSpecifiedTaskShowing('complete', 'error', 'removed')}">
+                        <a class="toolbar" title="{{'Clear All Tasks' | translate}}" ng-click="clearStoppedTasks()">
+                            <i class="fa fa-trash-o"></i>
+                        </a>
                     </li>
                     <li class="divider"></li>
+                    <li ng-if="retryCountdown > 0">
+                        <a class="toolbar">
+                            <i class="fa fa-clock-o"></i>
+                            <span ng-bind="retryCountdown"></span>
+                        </a>
+                    </li>
+                    <li class="divider" ng-if="retryCountdown > 0"></li>
                     <li class="disabled" ng-class="{'disabled': !taskContext.enableSelectAll || !taskContext.list || taskContext.list.length < 1}">
                         <a class="toolbar" title="{{'Select All' | translate}}" ng-click="selectAllTasks()">
                             <i class="fa fa-th-large"></i>

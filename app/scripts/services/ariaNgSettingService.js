@@ -466,6 +466,24 @@
             setConfirmTaskRemoval: function (value) {
                 setOption('confirmTaskRemoval', value);
             },
+            getAutoRetryTasks: function () {
+                return getOption('autoRetryTasks');
+            },
+            setAutoRetryTasks: function (value) {
+                setOption('autoRetryTasks', value);
+            },
+            getAutoRetryInterval: function () {
+                return getOption('autoRetryInterval');
+            },
+            setAutoRetryInterval: function (value) {
+                setOption('autoRetryInterval', Math.max(parseInt(value), 0));
+            },
+            getShowAutoRetryCountdown: function () {
+                return getOption('showAutoRetryCountdown');
+            },
+            setShowAutoRetryCountdown: function (value) {
+                setOption('showAutoRetryCountdown', value);
+            },
             getIncludePrefixWhenCopyingFromTaskDetails: function () {
                 return getOption('includePrefixWhenCopyingFromTaskDetails');
             },

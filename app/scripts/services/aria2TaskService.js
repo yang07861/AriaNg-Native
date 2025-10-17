@@ -911,6 +911,79 @@
                     callback: callback
                 });
             },
+            getFailedTasks: function (callback, silent) {
+                return this.getTaskList('stopped', true, function (response) {
+                    if (!response.success) {
+                        callback(response);
+                        return;
+                    }
+
+                    var failedTasks = [];
+                    for (var i = 0; i < response.data.length; i++) {
+                        var task = response.data[i];
+                        if (task.status === 'error') {
+                            failedTasks.push(task);
+                        }
+                    }
+
+                    response.data = failedTasks;
+                    callback(response);
+                }, silent);
+            },
+            clearCompletedTasks: function (callback, silent) {
+                return this.getTaskList('stopped', true, function (response) {
+                    if (!response.success) {
+                        callback(response);
+                        return;
+                    }
+
+                    var completedTaskGids = [];
+                    for (var i = 0; i < response.data.length; i++) {
+                        var task = response.data[i];
+                        if (task.status === 'complete') {
+                            completedTaskGids.push(task.gid);
+                        }
+                    }
+
+                    if (completedTaskGids.length === 0) {
+                        callback({ success: true, data: 'OK' });
+                        return;
+                    }
+
+                    return aria2RpcService.removeDownloadResultMulti({
+                        gids: completedTaskGids,
+                        silent: !!silent,
+                        callback: callback
+                    });
+                }, silent);
+            },
+            clearFailedTasks: function (callback, silent) {
+                return this.getTaskList('stopped', true, function (response) {
+                    if (!response.success) {
+                        callback(response);
+                        return;
+                    }
+
+                    var failedTaskGids = [];
+                    for (var i = 0; i < response.data.length; i++) {
+                        var task = response.data[i];
+                        if (task.status !== 'complete') {
+                            failedTaskGids.push(task.gid);
+                        }
+                    }
+
+                    if (failedTaskGids.length === 0) {
+                        callback({ success: true, data: 'OK' });
+                        return;
+                    }
+
+                    return aria2RpcService.removeDownloadResultMulti({
+                        gids: failedTaskGids,
+                        silent: !!silent,
+                        callback: callback
+                    });
+                }, silent);
+            },
             onConnectionSuccess: function (callback) {
                 if (!callback) {
                     ariaNgLogService.warn('[aria2TaskService.onConnectionSuccess] callback is null');

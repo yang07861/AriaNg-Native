@@ -407,6 +407,18 @@
             ariaNgSettingService.setConfirmTaskRemoval(value);
         };
 
+        $scope.setAutoRetryTasks = function (value) {
+            ariaNgSettingService.setAutoRetryTasks(value);
+        };
+
+        $scope.setAutoRetryInterval = function (value) {
+            ariaNgSettingService.setAutoRetryInterval(value);
+        };
+
+        $scope.setShowAutoRetryCountdown = function (value) {
+            ariaNgSettingService.setShowAutoRetryCountdown(value);
+        };
+
         $scope.setIncludePrefixWhenCopyingFromTaskDetails = function (value) {
             ariaNgSettingService.setIncludePrefixWhenCopyingFromTaskDetails(value);
         };

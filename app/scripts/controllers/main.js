@@ -4,6 +4,10 @@
     angular.module('ariaNg').controller('MainController', ['$rootScope', '$scope', '$route', '$window', '$location', '$document', '$interval', 'clipboard', 'aria2RpcErrors', 'ariaNgCommonService', 'ariaNgVersionService', 'ariaNgNotificationService', 'ariaNgSettingService', 'ariaNgMonitorService', 'ariaNgTitleService', 'aria2TaskService', 'aria2SettingService', 'ariaNgNativeElectronService', function ($rootScope, $scope, $route, $window, $location, $document, $interval, clipboard, aria2RpcErrors, ariaNgCommonService, ariaNgVersionService, ariaNgNotificationService, ariaNgSettingService, ariaNgMonitorService, ariaNgTitleService, aria2TaskService, aria2SettingService, ariaNgNativeElectronService) {
         var pageTitleRefreshPromise = null;
         var globalStatRefreshPromise = null;
+        var autoRetryPromise = null;
+        var lastAutoRetryTime = 0;
+
+        $scope.retryCountdown = 0;
 
         var getTaskListPageType = function () {
             var location = $location.path().substring(1);
@@ -351,6 +355,60 @@
             });
         };
 
+        $scope.clearCompletedTasks = function () {
+            ariaNgCommonService.confirm('Confirm Clear', 'Are you sure you want to clear completed tasks?', 'warning', function () {
+                $rootScope.loadPromise = aria2TaskService.clearCompletedTasks(function (response) {
+                    if (!response.success) {
+                        return;
+                    }
+
+                    refreshGlobalStat(true);
+
+                    if ($location.path() !== '/stopped') {
+                        $location.path('/stopped');
+                    } else {
+                        $route.reload();
+                    }
+                });
+            });
+        };
+
+        $scope.clearFailedTasks = function () {
+            ariaNgCommonService.confirm('Confirm Clear', 'Are you sure you want to clear failed tasks?', 'warning', function () {
+                $rootScope.loadPromise = aria2TaskService.clearFailedTasks(function (response) {
+                    if (!response.success) {
+                        return;
+                    }
+
+                    refreshGlobalStat(true);
+
+                    if ($location.path() !== '/stopped') {
+                        $location.path('/stopped');
+                    } else {
+                        $route.reload();
+                    }
+                });
+            });
+        };
+
+        $scope.retryAllFailedTasks = function () {
+            aria2TaskService.getFailedTasks(function (response) {
+                if (!response.success || !response.data || response.data.length < 1) {
+                    return;
+                }
+
+                var tasks = response.data;
+
+                aria2TaskService.retryTasks(tasks, function (response) {
+                    refreshGlobalStat(true);
+
+                    if (response.hasSuccess) {
+                        $route.reload();
+                    }
+                }, true);
+            }, true);
+        };
+
         $scope.isAllTasksSelected = function () {
             return $rootScope.taskContext.isAllSelected();
         };
@@ -459,6 +517,25 @@
             }, ariaNgSettingService.getGlobalStatRefreshInterval());
         }
 
+        if (ariaNgSettingService.getAutoRetryTasks()) {
+            autoRetryPromise = $interval(function () {
+                var interval = ariaNgSettingService.getAutoRetryInterval();
+
+                if (lastAutoRetryTime > 0 && (new Date().getTime() - lastAutoRetryTime) / 1000 >= interval) {
+                    $scope.retryAllFailedTasks();
+                    lastAutoRetryTime = new Date().getTime();
+                } else if (lastAutoRetryTime === 0) {
+                    lastAutoRetryTime = new Date().getTime();
+                }
+
+                if (ariaNgSettingService.getShowAutoRetryCountdown()) {
+                    $scope.retryCountdown = Math.max(0, interval - parseInt((new Date().getTime() - lastAutoRetryTime) / 1000));
+                } else {
+                    $scope.retryCountdown = 0;
+                }
+            }, 1000);
+        }
+
         $scope.$on('$destroy', function () {
             if (pageTitleRefreshPromise) {
                 $interval.cancel(pageTitleRefreshPromise);
@@ -466,6 +543,10 @@
 
             if (globalStatRefreshPromise) {
                 $interval.cancel(globalStatRefreshPromise);
+            }
+
+            if (autoRetryPromise) {
+                $interval.cancel(autoRetryPromise);
             }
         });
 
